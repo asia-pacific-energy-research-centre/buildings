@@ -329,3 +329,57 @@ fig = px.line(all_energy_line, x='year', y='energy', color='sub2sectors', facet_
 fig.update_yaxes(matches=None, showticklabels=True)
 fig.write_html('plotting_output/analysis/energy_use_by_sub2sectors.html')
 # %%
+
+
+
+#import 8th data :
+cn_8th = pd.read_csv(os.path.join(config.root_dir, 'input_data', '8th_outlook_energy', 'OSeMOSYS_to_EGEDA_2020_netzero.csv'))
+ref_8th = pd.read_csv(os.path.join(config.root_dir, 'input_data', '8th_outlook_energy', 'OSeMOSYS_to_EGEDA_2020_reference.csv'))
+
+cn_8th['scenario'] = 'carbon neutrality'
+ref_8th['scenario'] = 'reference'
+all_8th = pd.concat([cn_8th, ref_8th], axis=0)
+#filter for item_code_new:
+# 16_1_commercial_and_public_services
+# 16_2_residential
+
+all_8th = all_8th.loc[all_8th['item_code_new'].isin(['16_1_commercial_and_public_services','16_2_residential'])].copy()
+#filter for fuel_codes that arent subtotals (ughhhh)
+#oh actually just get 19_total
+all_8th = all_8th.loc[all_8th['fuel_code']=='19_total'].copy()
+#make it tall
+year_cols = [col for col in all_8th.columns if re.match(r'\d{4}', col)]
+all_8th_melt = all_8th.melt(id_vars=['scenario','economy','item_code_new','fuel_code'], value_vars=year_cols, var_name='year', value_name='energy')
+all_8th_melt['dataset'] = '8th ' + all_8th_melt['scenario']
+#rename the item_code_new to sub2sectors
+all_8th_melt['sub2sectors'] = all_8th_melt['item_code_new'].replace({'16_1_commercial_and_public_services':'16_01_01_commercial_and_public_services','16_2_residential':'16_01_02_residential'})
+all_8th_melt.drop(columns=['scenario', 'item_code_new', 'fuel_code'], inplace=True)
+#drop economies not in all_energy_line
+all_8th_melt = all_8th_melt.loc[all_8th_melt['economy'].isin(all_energy_line['economy'].unique())].copy()
+
+#drop all data that is 0's
+all_8th_melt = all_8th_melt.loc[all_8th_melt['energy']!=0].copy()
+#%%
+HAVE_ALL_FIRST_ITERATION_DATA_BY_ECONOMY = False
+if HAVE_ALL_FIRST_ITERATION_DATA_BY_ECONOMY:
+    #and do the same for the files we are usign for first iteration of 9th:
+    # \9th_outlook_energy\merged_file_energy_00_APEC_20240809.csv which will ahve the same formatting and structure as the esto data:
+    outlook_9th = pd.read_csv(os.path.join(config.root_dir, 'input_data', '9th_outlook_energy', 'merged_file_energy_00_APEC_20240809.csv'))
+    outlook_9th = outlook_9th.loc[outlook_9th['sub2sectors'].isin(['16_01_02_residential','16_01_01_commercial_and_public_services'])].copy()
+    outlook_9th = outlook_9th.loc[outlook_9th['fuels']=='19_total'].copy()
+    #and subtotal_layout	subtotal_results are false
+    outlook_9th = outlook_9th.loc[outlook_9th['subtotal_layout']==False].copy()
+    outlook_9th = outlook_9th.loc[outlook_9th['subtotal_results']==False].copy()
+    outlook_9th.drop(columns=['subtotal_layout','subtotal_results'], inplace=True)
+    outlook_9th_melt = outlook_9th.melt(id_vars=['scenarios','economy','sub2sectors','fuels'], value_vars=year_cols, var_name='year', value_name='energy')
+    #ah damn i didnt realise this was only for the sum of 00_APEC. id need to get the data for the individual economies. jsut skip.
+
+#NOW concat the 8th and 9th data to the all_energy_line df
+all_8th_melt['year'] = all_8th_melt['year'].astype(int)
+all_energy_line_plot = pd.concat([all_energy_line, all_8th_melt], axis=0)
+
+fig = px.line(all_energy_line_plot, x='year', y='energy', color='sub2sectors', facet_col='economy', facet_col_wrap=7, line_dash='dataset')
+
+fig.update_yaxes(matches=None, showticklabels=True)
+fig.write_html('plotting_output/analysis/energy_use_by_sub2sectors_8th_comp.html')
+# %%
