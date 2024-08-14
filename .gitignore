@@ -1,3 +1,11 @@
+#ignore csvs and excels and htmls
+*.xlsx
+*.xlsm
+*.xls
+*.html
+*.csv
+
+################PREGENERATED################
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

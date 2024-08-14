@@ -1,0 +1,17 @@
+name: env_buildings
+dependencies:
+  - plotly
+  - pandas
+  - numpy
+  - matplotlib
+  - openpyxl
+  - pip
+  - jupyter
+  - ipykernel
+  - xlwings
+  - scipy
+  - pyyaml #yaml doesnt work.
+  - pip:
+    - kaleido
+    - googletrans
+#conda env create --prefix ./env_buildings --file ./config/env_buildings.yml

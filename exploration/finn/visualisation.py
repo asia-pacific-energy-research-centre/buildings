@@ -58,14 +58,14 @@ for sector in buildings_final_df['sector'].unique():
     WRITE_HTML = False
     if WRITE_HTML:
     #save to file
-        fig.write_html(f'plotting_output/analysis/buildings/{sector}_by_economy_energy_use_by_end_use.html')
+        fig.write_html(f'plotting_output/analysis/{sector}_by_economy_energy_use_by_end_use.html')
     #create bar versions which will use the average of all years
     sector_data = sector_data.groupby(['economy', 'end_use']).mean(numeric_only=True).reset_index()
     fig = px.bar(sector_data, x='end_use', y='value', color='end_use', facet_col='economy', facet_col_wrap=3, title=f'{sector} energy use by end use')
         
     WRITE_HTML = False
     if WRITE_HTML:
-        fig.write_html(f'plotting_output/analysis/buildings/{sector}_by_economy_energy_use_by_end_use_bar.html')
+        fig.write_html(f'plotting_output/analysis/{sector}_by_economy_energy_use_by_end_use_bar.html')
 
 #by end use (as the facet col), create a time series of the energy with color as the fuel and y as the year
 for sector in buildings_final_df['sector'].unique():
@@ -98,14 +98,14 @@ for sector in buildings_final_df['sector'].unique():
     WRITE_HTML = False
     if WRITE_HTML:
         #save to file
-        fig.write_html(f'plotting_output/analysis/buildings/{sector}_by_end_use_energy_use_by_fuel.html')
+        fig.write_html(f'plotting_output/analysis/{sector}_by_end_use_energy_use_by_fuel.html')
     #create bar versions which will use the average of all years
     sector_data = sector_data.groupby(['end_use', 'fuel']).mean(numeric_only=True).reset_index()
     fig = px.bar(sector_data, x='fuel', y='value', color='fuel', facet_col='end_use', facet_col_wrap=3, title=f'{sector} energy use by fuel')
         
     WRITE_HTML = False
     if WRITE_HTML:
-        fig.write_html(f'plotting_output/analysis/buildings/{sector}_by_end_use_energy_use_by_fuel_bar.html')
+        fig.write_html(f'plotting_output/analysis/{sector}_by_end_use_energy_use_by_fuel_bar.html')
 
 #%%
 #do similar things with energy intensity but we will ahve to include the effect of the per column which is wat the energy intensity's activity is per (e.g. per capita, per floor area etc).
@@ -137,7 +137,7 @@ for sector in buildings_final_df['sector'].unique():
                 
         WRITE_HTML = False
         if WRITE_HTML:
-            fig.write_html(f'plotting_output/analysis/buildings/{sector}_by_economy_energy_intensity_by_end_use_per_{per_col}.html')
+            fig.write_html(f'plotting_output/analysis/{sector}_by_economy_energy_intensity_by_end_use_per_{per_col}.html')
         
     #normalise by the per columns 'THen after we can normalise all per columns to be the same and then compare the indexed intensity of end uses by economy. When we normalise i guess it should be done by removing the end use column and then normlising across the rows: sector'
     normalised_1 = buildings_final_df[(buildings_final_df['sector'] == sector) & (buildings_final_df['measure'] == 'energy_intensity') & (buildings_final_df['end_use'] != 'total') & (buildings_final_df['fuel'] == 'all')]
@@ -170,14 +170,14 @@ for sector in buildings_final_df['sector'].unique():
                 
         WRITE_HTML = False
         if WRITE_HTML:
-            fig.write_html(f'plotting_output/analysis/buildings/{sector}_normalised_energy_intensity_by_end_use_per_{groups}.html')
+            fig.write_html(f'plotting_output/analysis/{sector}_normalised_energy_intensity_by_end_use_per_{groups}.html')
         
     #plot
     fig = px.bar(normalised_1, x='end_use', y='value', color='per', facet_col='economy', facet_col_wrap=3, title=f'{sector} normalised energy intensity by end use')
         
     WRITE_HTML = False
     if WRITE_HTML:
-        fig.write_html(f'plotting_output/analysis/buildings/{sector}_normalised_energy_intensity_by_end_use_with_per.html')
+        fig.write_html(f'plotting_output/analysis/{sector}_normalised_energy_intensity_by_end_use_with_per.html')
     #plot with average of all pers
     normalised_2 = normalised_1.groupby(['economy', 'end_use']).mean(numeric_only=True).reset_index()
     fig = px.bar(normalised_2, x='end_use', y='value', color='end_use', facet_col='economy', facet_col_wrap=3, title=f'{sector} normalised energy intensity by end use')
@@ -185,7 +185,7 @@ for sector in buildings_final_df['sector'].unique():
         
     WRITE_HTML = False
     if WRITE_HTML:
-        fig.write_html(f'plotting_output/analysis/buildings/{sector}_normalised_energy_intensity_by_end_use.html')
+        fig.write_html(f'plotting_output/analysis/{sector}_normalised_energy_intensity_by_end_use.html')
     
 #%% 
 
@@ -242,7 +242,7 @@ for sector in buildings_final_df['sector'].unique():
     WRITE_HTML = False
     if WRITE_HTML:
     #save to file
-        fig.write_html(f'plotting_output/analysis/buildings/{sector}_by_economy_energy_intensity_by_end_use.html')
+        fig.write_html(f'plotting_output/analysis/{sector}_by_economy_energy_intensity_by_end_use.html')
     
     #what about a scatter with x = end use, facet row = per, y = value, color = economy
     breakpoint()
@@ -255,7 +255,7 @@ for sector in buildings_final_df['sector'].unique():
     
     WRITE_HTML = False
     if WRITE_HTML:
-        fig.write_html(f'plotting_output/analysis/buildings/{sector}_by_economy_energy_intensity_by_end_use_scatter.html')
+        fig.write_html(f'plotting_output/analysis/{sector}_by_economy_energy_intensity_by_end_use_scatter.html')
     
     
     
@@ -300,7 +300,7 @@ fig = px.bar(intensity_plot_final, x='economy', y='value', color='economy', face
 WRITE_HTML = False
 if WRITE_HTML:
 #save to file
-    fig.write_html(f'plotting_output/analysis/buildings/by_economy_energy_intensity_by_end_use.html')
+    fig.write_html(f'plotting_output/analysis/by_economy_energy_intensity_by_end_use.html')
 
 #what about a scatter with x = end use, facet row = per, y = value, color = economy
 fig = px.scatter(intensity_plot_final, x='end_use', y='value', color='economy', facet_col='per', title=f'energy intensity by end use and per', symbol='sector')
@@ -312,7 +312,7 @@ fig.update_xaxes(matches=None, showticklabels=True)
 
 WRITE_HTML = False
 if WRITE_HTML:
-    fig.write_html(f'plotting_output/analysis/buildings/by_economy_energy_intensity_by_end_use_scatter.html')
+    fig.write_html(f'plotting_output/analysis/by_economy_energy_intensity_by_end_use_scatter.html')
 #%%
 #since we know its a good chart, also show it by year, economy end use - normalised.
 #we will normalis within each per sicne we know that the remaining values should all be on the same scale:
@@ -353,7 +353,7 @@ fig.update_xaxes(matches=None, showticklabels=True)
 
 WRITE_HTML = False
 if WRITE_HTML:
-    fig.write_html(f'plotting_output/analysis/buildings/by_economy_energy_intensity_by_end_use_line_normalised.html')
+    fig.write_html(f'plotting_output/analysis/by_economy_energy_intensity_by_end_use_line_normalised.html')
 
 #%%
 ##################################
@@ -423,7 +423,7 @@ fig.add_annotation(
     font=dict(size=10)
 )
 
-fig.write_html(f'plotting_output/analysis/buildings/by_economy_energy_intensity_by_end_use_line_normalised_comp_with_per_cap.html')
+fig.write_html(f'plotting_output/analysis/by_economy_energy_intensity_by_end_use_line_normalised_comp_with_per_cap.html')
 ##################################
 #above is a good chart. shows how the per capita values compare to the other values when normalised. therefore it shows how the scale of the per capita values compare to the other values and between each other. i.e. per capita space heating intensity is a lot higher than the other 'per' values, which means that maybe we should use other intensity measures for space heating. But the other values are relatively similar to each other in scale which means that if at least one of them is accurate then the others should be too.
 ##################################
@@ -492,7 +492,7 @@ for sector in energy['sector'].unique():
     WRITE_HTML = False
     if WRITE_HTML:
         #save to file
-        fig.write_html(f'plotting_output/analysis/buildings/{sector}_by_economy_energy_use_by_end_use.html')
+        fig.write_html(f'plotting_output/analysis/{sector}_by_economy_energy_use_by_end_use.html')
     ##################
     #and then remove the fuel and reclacualte: (by end use, no fuel)
     sector_data = energy[energy['sector'] == sector]
@@ -503,7 +503,7 @@ for sector in energy['sector'].unique():
         
     WRITE_HTML = False
     if WRITE_HTML:
-        fig.write_html(f'plotting_output/analysis/buildings/{sector}_by_economy_energy_use_by_end_use_no_fuel.html')
+        fig.write_html(f'plotting_output/analysis/{sector}_by_economy_energy_use_by_end_use_no_fuel.html')
     ##################
     #and then do it by fuel, no end use
     sector_data = energy[energy['sector'] == sector]
@@ -513,7 +513,7 @@ for sector in energy['sector'].unique():
         
     WRITE_HTML = False
     if WRITE_HTML:
-        fig.write_html(f'plotting_output/analysis/buildings/{sector}_by_economy_energy_use_by_fuel.html')
+        fig.write_html(f'plotting_output/analysis/{sector}_by_economy_energy_use_by_fuel.html')
     ##################
     #and then do some scatter plots which remove the year 
     ##################
@@ -531,7 +531,7 @@ for sector in energy['sector'].unique():
     
     WRITE_HTML = False
     if WRITE_HTML:
-        fig.write_html(f'plotting_output/analysis/buildings/{sector}_by_economy_energy_use_by_end_use_scatter.html')
+        fig.write_html(f'plotting_output/analysis/{sector}_by_economy_energy_use_by_end_use_scatter.html')
     ##################
     #take a look at the scatter plot of energy use by fuel, with color as end use
     sector_data = energy[energy['sector'] == sector]
@@ -547,7 +547,7 @@ for sector in energy['sector'].unique():
         
     WRITE_HTML = False
     if WRITE_HTML:
-        fig.write_html(f'plotting_output/analysis/buildings/{sector}_by_economy_energy_use_by_fuel_scatter.html')
+        fig.write_html(f'plotting_output/analysis/{sector}_by_economy_energy_use_by_fuel_scatter.html')
     
 #%%
 #at the end of the day its not that interesting to see the energy use since we kind of expect it. more useful as a modelling input:
@@ -557,6 +557,51 @@ for sector in energy['sector'].unique():
 
 
 
+eei = buildings_final_df.copy()
+END_USES = ['space_heating', 'space_cooling', 'water_heating', 'cooking', 'lighting', 'residential_appliances', 'non_specified', 'space_heating', 'space_cooling', 'lighting', 'other_building_energy_use', 'non_building_energy_use']
+
+intensity = eei.loc[(eei['measure'] == 'energy_intensity') & (eei.end_use.isin(END_USES))].copy()
+intensity.end_use.unique()#array(['space_heating', 'space_cooling', 'lighting', 'water_heating',
+#    'cooking', 'residential_appliances'], dtype=object)
+#%%
+#double check that this covers all intended end uses by checking that the sum of energy is the same as the total:
+energy_by_end_use = eei.loc[(eei['measure'] == 'energy') & (eei.end_use.isin(END_USES) & (eei.fuel=='all'))].copy()
+energy_total = eei.loc[(eei['measure'] == 'energy')& (eei.end_use.isin(['total'])) & (eei.fuel=='all')].copy()
+#sum value  by year and economy
+energy_by_end_use = energy_by_end_use.groupby(['economy','year']).sum().reset_index()[['economy','year','value']]
+energy_total = energy_total.groupby(['economy','year']).sum().reset_index()[['economy','year','value']]
+
+#find the difference between the two:
+energy_diff = energy_total.merge(energy_by_end_use, on=['economy','year'], suffixes=('_total','_end_use'))
+energy_diff['diff'] = energy_diff['value_total'] - energy_diff['value_end_use']
+#plot the difference on plotly
+import plotly.express as px
+fig = px.line(energy_diff, x='year', y='diff', color='economy')
+fig.show()
+#%%
+#note that we dont have intensity by the end uses for non_specified, other_building_energy_use, and non_building_energy_use. We snhould try quantify these differences:
+energy_by_end_use = eei.loc[(eei['measure'] == 'energy') & (eei.end_use.isin(END_USES) & (eei.fuel=='all'))].copy()
+#label the end uses that are not covered by the intensity data
+energy_by_end_use['end_use_label'] = 'total'
+energy_by_end_use.loc[~energy_by_end_use['end_use'].isin(intensity.end_use.unique()), 'end_use_label'] = 'no_intensity_data'
+#sum value  by year and economy
+energy_by_end_use = energy_by_end_use.groupby(['economy','year','end_use_label']).sum().reset_index()[['economy','year','value','end_use_label']]
+energy_total['end_use_label'] = 'total'
+#merge the two dataframes and find the difference
+energy_by_end_use = energy_by_end_use.merge(energy_total, on=['economy','year','end_use_label'], suffixes=('_end_use','_total'), how='inner')
+
+energy_by_end_use['diff'] = energy_by_end_use['value_total'] - energy_by_end_use['value_end_use']
+#calculate the percentage difference
+energy_by_end_use['diff_percentage'] = energy_by_end_use['diff']/energy_by_end_use['value_total']
+
+#plot the difference on plotly
+fig = px.line(energy_by_end_use, x='year', y='diff_percentage', color='economy')
+fig.show()
+
+#and clacualte the average percentage difference
+print('The average missing percentage of energy in the intensity data is: ' + str(energy_by_end_use['diff_percentage'].mean()))
+#The average missing percentage of energy in the intensity data is: 0.44187177629088087
+#thats quite a lot... we should try to find a way to estimate this
 
 
 
