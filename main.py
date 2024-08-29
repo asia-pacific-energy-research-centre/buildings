@@ -383,3 +383,4 @@ fig = px.line(all_energy_line_plot, x='year', y='energy', color='sub2sectors', f
 fig.update_yaxes(matches=None, showticklabels=True)
 fig.write_html('plotting_output/analysis/energy_use_by_sub2sectors_8th_comp.html')
 # %%
+
