@@ -40,38 +40,32 @@ years = [i for i in range(1980, 2101, 1)]
 # %%
 #################################### Canada #################################################################
 # 01_coal
-# coal is zero by 2017
-
+# coal is zero by 2017 so no adjustments needed
 # %%
 # 07_petroleum_products
 fuel_intensity_traj(economy = '03_CDA', fuels = '07_petroleum_products', proj_start_year = 2022, 
                     shape = 'decrease', magnitude = 0.5,
                     data=intensity_trajectory_interim)
-
 # %%
 # 08_gas
 fuel_intensity_traj(economy = '03_CDA', fuels = '08_gas', proj_start_year = 2022, 
                     shape = 'decrease', magnitude = 0.5,
                     data=intensity_trajectory_interim)
-
 # %%
 # 15_solid_biomass
 fuel_intensity_traj(economy = '03_CDA', fuels = '15_solid_biomass', proj_start_year = 2022, 
                     shape = 'decrease', magnitude = 0.5,
                     data=intensity_trajectory_interim)
-
 # %%
 # 16_others
 fuel_intensity_traj(economy = '03_CDA', fuels = '16_others', proj_start_year = 2022, 
                     shape = 'decrease', magnitude = 0.5,
                     data=intensity_trajectory_interim)
-
 # %%
 # 17_electricity
 fuel_intensity_traj(economy = '03_CDA', fuels = '17_electricity', proj_start_year = 2022, 
                     shape = 'decrease', magnitude = 0.5,
                     data=intensity_trajectory_interim)
-
 # %%
 # 18_heat
 fuel_intensity_traj(economy = '03_CDA', fuels = '18_heat', proj_start_year = 2022, 
@@ -97,9 +91,8 @@ traj_overwrite_df.to_csv(config.root_dir + '/output_data/fuel_intensity_refine_a
 intensity_trajectory_interim = intensity_trajectory_interim.copy()
 traj_overwrite_df = traj_overwrite_df.copy()
 
-fueluse_adj = intensity_trajectory_interim.merge(traj_overwrite_df, how = 'left',
-                              on = ['economy', 'year', 'fuels', 
-                                    'dataset', 'fuel_PJ', 'population', 'fuel_intensity_GJperCap'])
+fueluse_adj = pd.merge(intensity_trajectory_interim, traj_overwrite_df[['year', 'economy', 'fuels', 'adj_fuel_intensity']],
+                     on=['year', 'economy', 'fuels'], how='left')
 fueluse_adj.to_csv(config.root_dir + '/output_data/fuel_intensity_refine_auto/fueluse_testing_copy.csv', index = False)
 
 # %%
