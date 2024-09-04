@@ -1,87 +1,119 @@
-
-
-# def apply_fuel_switching(row):
-#     if row['year'] >= switch_year and row['old_fuel'] == 'fuel_type_1':
-#         return 'fuel_type_2'
-#     return row['old_fuel']
-
-# df['new_fuel_type'] = df.apply(apply_fuel_switching, axis=1)
-# df['adjusted_fuel_use'] = df.apply(lambda row: row['fuel_use'] * fuel_efficiency_factors[row['new_fuel_type']], axis=1)
-
+#%%
 import pandas as pd
+import numpy as np
+import os
+import re
+import plotly.express as px
+import glob
 
-# Initial DataFrame
-data = {
-    'year': [2025, 2026, 2027, 2028, 2029, 2030, 2031, 2032, 2033, 2034] * 2,
-    'economy': ['Economy_A'] * 10 + ['Economy_B'] * 10,
-    'fuel_type': ['fuel_type_1'] * 10 + ['fuel_type_3'] * 10,
-    'fuel_use': [100, 105, 110, 115, 120, 125, 130, 135, 140, 145] * 2,
-}
+####
+#self made helper functions
+import utility_functions
+import configurations
+root_dir =re.split('buildings', os.getcwd())[0]+'/buildings'
+config = configurations.Config(root_dir)
 
-df = pd.DataFrame(data)
+# %%
+
+# Import data of adjusted fuel use from c2 intensity adjustments
+df_initial = pd.read_csv(config.root_dir + '/output_data/fuel_intensity_refine_auto/fueluse_adj_all.csv')
+
+df = df_initial.loc[
+    (df_initial['dataset'] == 'projection') &
+    (df_initial['fuels'].isin(['01_coal', '08_gas', '17_electricity'])) &
+    (df_initial['economy'].isin(['01_AUS', '03_CDA']))
+]
+
+df = df.rename(columns={'fueluse_adj': 'fuel_use'}).copy()
+# %%
 
 # Define fuel efficiency factors
 fuel_efficiency_factors = {
-    'fuel_type_1': 1.0,
-    'fuel_type_2': 0.8,
-    'fuel_type_3': 0.9,
-    'fuel_type_4': 0.7,
+    '01_coal': 1.0,
+    '08_gas': 0.8,
+    '17_electricity': 0.6,
 }
+# %%
 
-# Function to calculate the proportion of each fuel type during the transition
-def calculate_fuel_proportion(row, start_year, end_year):
-    transition_duration = end_year - start_year + 1
-    
-    if row['year'] < start_year:
-        return 1.0, 0.0  # 100% original fuel
-    elif row['year'] > end_year:
-        return 0.0, 1.0  # 100% new fuel
-    else:
-        # Linear transition: gradually reduce original fuel and increase new fuel
-        original_fuel_proportion = (end_year - row['year']) / transition_duration
-        new_fuel_proportion = 1 - original_fuel_proportion
-        return original_fuel_proportion, new_fuel_proportion
+# Define transitions for each economy
+economy_transitions = {
+    '01_AUS': [
+        {'from_fuel': '01_coal', 'to_fuel': '08_gas', 'start_year': 2022, 'end_year': 2029},
+        {'from_fuel': '08_gas', 'to_fuel': '17_electricity', 'start_year': 2028, 'end_year': 2045}
+    ],
+    '03_CDA': [
+        {'from_fuel': '08_gas', 'to_fuel': '17_electricity', 'start_year': 2022, 'end_year': 2035}
+    ]
+}
+# %%
 
-# Apply the function to each row
-def apply_transition(row, fuel_efficiency_factors, start_year, end_year, new_fuel):
-    fuel_1_proportion, fuel_2_proportion = calculate_fuel_proportion(row, start_year, end_year)
+# Function to calculate fuel use with specific transitions iteratively
+
+import numpy as np
+
+def calculate_fuel_use_with_transitions(row, transitions, fuel_efficiency_factors):
+    adjusted_fuel_uses = {}
+    current_fuel = row['fuels']
+    current_fuel_use = row['fuel_use']  # Assuming 'fuel_use' is the column with the original fuel use
     
-    adjusted_fuel_use = (
-        row['fuel_use'] * fuel_1_proportion * fuel_efficiency_factors[row['fuel_type']] +
-        row['fuel_use'] * fuel_2_proportion * fuel_efficiency_factors[new_fuel]
+    for transition in transitions:
+        if current_fuel == transition['from_fuel']:
+            start_year = transition['start_year']
+            end_year = transition['end_year']
+            new_fuel = transition['to_fuel']
+            
+            # Initialize fuel proportions
+            fuel_1_proportion = 0.0
+            fuel_2_proportion = 0.0
+            
+            if row['year'] <= start_year:
+                fuel_1_proportion = 1.0
+                fuel_2_proportion = 0.0
+            elif row['year'] > end_year:
+                fuel_1_proportion = 0.0
+                fuel_2_proportion = 1.0
+            else:
+                # Exponential transition
+                transition_duration = end_year - start_year
+                year_position = row['year'] - start_year
+                fuel_2_proportion = 1 - np.exp(-5 * (year_position / transition_duration))
+                fuel_1_proportion = 1 - fuel_2_proportion
+            
+            # Calculate the amount of fuel transitioning
+            fuel_1_use = current_fuel_use * fuel_1_proportion
+            fuel_2_use = current_fuel_use * fuel_2_proportion
+            
+            # Apply efficiency only to the transitioning fuel
+            adjusted_fuel_uses[f'{current_fuel}_use'] = adjusted_fuel_uses.get(f'{current_fuel}_use', 0) + fuel_1_use 
+            adjusted_fuel_uses[f'{new_fuel}_use'] = adjusted_fuel_uses.get(f'{new_fuel}_use', 0) + fuel_2_use * fuel_efficiency_factors[new_fuel]
+            
+            # Update current fuel and fuel use for the next transition
+            current_fuel = new_fuel
+            current_fuel_use = fuel_2_use
+    
+    # If no transition was applied, return the original fuel use
+    if not adjusted_fuel_uses:
+        adjusted_fuel_uses[f'{current_fuel}_use'] = current_fuel_use
+    
+    return pd.Series(adjusted_fuel_uses)
+# %%
+# Loop through each economy, apply the transition rules, and combine results
+df_final = pd.DataFrame()
+
+# %%
+
+for economy, transitions in economy_transitions.items():
+    df_economy = df[df['economy'] == economy].copy()
+    df_transitions = df_economy.apply(
+        calculate_fuel_use_with_transitions,
+        axis=1,
+        transitions=transitions,
+        fuel_efficiency_factors=fuel_efficiency_factors
     )
-    
-    return pd.Series({
-        'fuel_1_proportion': fuel_1_proportion,
-        'fuel_2_proportion': fuel_2_proportion,
-        'new_fuel_type': new_fuel,
-        'adjusted_fuel_use': adjusted_fuel_use
-    })
-
-# Example of applying the transition for different fuels and economies
-# For Economy_A: fuel_type_1 -> fuel_type_2 from 2028 to 2032
-df_A = df[df['economy'] == 'Economy_A'].copy()
-df_A[['fuel_1_proportion', 'fuel_2_proportion', 'new_fuel_type', 'adjusted_fuel_use']] = df_A.apply(
-    apply_transition, 
-    axis=1, 
-    fuel_efficiency_factors=fuel_efficiency_factors, 
-    start_year=2028, 
-    end_year=2032, 
-    new_fuel='fuel_type_2'
-)
-
-# For Economy_B: fuel_type_3 -> fuel_type_4 from 2027 to 2031
-df_B = df[df['economy'] == 'Economy_B'].copy()
-df_B[['fuel_1_proportion', 'fuel_2_proportion', 'new_fuel_type', 'adjusted_fuel_use']] = df_B.apply(
-    apply_transition, 
-    axis=1, 
-    fuel_efficiency_factors=fuel_efficiency_factors, 
-    start_year=2027, 
-    end_year=2031, 
-    new_fuel='fuel_type_4'
-)
-
-# Combine the results
-df_combined = pd.concat([df_A, df_B])
-print(df_combined)
-
+    df_combined = pd.concat([df_economy, df_transitions], axis=1)
+    df_final = pd.concat([df_final, df_combined], ignore_index=True)
+# %%
+# Display the resulting DataFrame
+df_final.sort_values(by=['economy', 'year'])
+df_final.to_csv(config.root_dir + '/plotting_output/test_fuel_exchange.csv', index=False)
+# %%
