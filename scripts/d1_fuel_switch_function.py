@@ -25,16 +25,10 @@ df = df_initial.loc[
 ]
 
 df = df.rename(columns={'fueluse_adj': 'fuel_use'}).copy()
+
 # %%
 
-# Define fuel efficiency factors
-fuel_efficiency_factors = {
-    '01_coal': 1.0,
-    '08_gas': 0.8,
-    '17_electricity': 0.6,
-}
-# %%
-
+# ALL DUMMY VALUES FOR NOW
 # Define transitions for each economy
 economy_transitions = {
     '01_AUS': [
@@ -45,13 +39,18 @@ economy_transitions = {
         {'from_fuel': '08_gas', 'to_fuel': '17_electricity', 'start_year': 2022, 'end_year': 2035}
     ]
 }
+
+# Define specific efficiency factors for each transition
+# Add more as needed
+transition_efficiency_factors = {
+    ('01_coal', '08_gas'): 0.8,  # Gas is 0.8 times as efficient as coal
+    ('08_gas', '17_electricity'): 0.75,  # Electricity is 0.75 times as efficient as gas
+}
 # %%
 
 # Function to calculate fuel use with specific transitions iteratively
 
-import numpy as np
-
-def calculate_fuel_use_with_transitions(row, transitions, fuel_efficiency_factors):
+def calculate_fuel_use_with_transitions(row, transitions, transition_efficiency_factors):
     adjusted_fuel_uses = {}
     current_fuel = row['fuels']
     current_fuel_use = row['fuel_use']  # Assuming 'fuel_use' is the column with the original fuel use
@@ -76,16 +75,20 @@ def calculate_fuel_use_with_transitions(row, transitions, fuel_efficiency_factor
                 # Exponential transition
                 transition_duration = end_year - start_year
                 year_position = row['year'] - start_year
+                # Set swtich equation/relationship at this line ###########################
                 fuel_2_proportion = 1 - np.exp(-5 * (year_position / transition_duration))
+                ###########################################################################
                 fuel_1_proportion = 1 - fuel_2_proportion
             
             # Calculate the amount of fuel transitioning
             fuel_1_use = current_fuel_use * fuel_1_proportion
             fuel_2_use = current_fuel_use * fuel_2_proportion
             
+            efficiency_factor = transition_efficiency_factors.get((current_fuel, new_fuel), 1.0)
+
             # Apply efficiency only to the transitioning fuel
-            adjusted_fuel_uses[f'{current_fuel}_use'] = adjusted_fuel_uses.get(f'{current_fuel}_use', 0) + fuel_1_use 
-            adjusted_fuel_uses[f'{new_fuel}_use'] = adjusted_fuel_uses.get(f'{new_fuel}_use', 0) + fuel_2_use * fuel_efficiency_factors[new_fuel]
+            adjusted_fuel_uses[f'{current_fuel}_use'] = adjusted_fuel_uses.get(f'{current_fuel}_use', 0) + fuel_1_use
+            adjusted_fuel_uses[f'{new_fuel}_use'] = adjusted_fuel_uses.get(f'{new_fuel}_use', 0) + fuel_2_use * efficiency_factor
             
             # Update current fuel and fuel use for the next transition
             current_fuel = new_fuel
@@ -108,7 +111,7 @@ for economy, transitions in economy_transitions.items():
         calculate_fuel_use_with_transitions,
         axis=1,
         transitions=transitions,
-        fuel_efficiency_factors=fuel_efficiency_factors
+        transition_efficiency_factors=transition_efficiency_factors
     )
     df_combined = pd.concat([df_economy, df_transitions], axis=1)
     df_final = pd.concat([df_final, df_combined], ignore_index=True)
