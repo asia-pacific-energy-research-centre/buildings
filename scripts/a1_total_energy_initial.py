@@ -444,3 +444,4 @@ all_energy_line_plot.to_csv(output_data_dir + 'summedannual_energy_data.csv', in
 
 
 
+#%%

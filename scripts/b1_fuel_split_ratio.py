@@ -82,3 +82,9 @@ esto_total_export.drop(columns=['year', 'energy_esto', 'energy_esto_annualtotal'
 esto_total_export.to_csv(config.root_dir + '/output_data/fuel_split_ratio.csv', index=False)
 
 # %%
+
+
+
+
+
+
