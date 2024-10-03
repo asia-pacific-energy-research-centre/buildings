@@ -1,0 +1,100 @@
+
+# Initial DataFrame with more data and fuel types
+end_use:
+  - space_heating
+  - space_cooling
+  - water_heating
+  - cooking
+  - lighting
+  - residential_appliances
+  - non_specified
+  - space_heating
+  - space_cooling
+  - lighting
+  - other_building_energy_use
+  - non_building_energy_use
+
+# Fuel types:
+# - oil
+# - gas
+# - coal
+# - biofuels
+# - heat
+# - electricity
+# - other
+# - all
+
+end_use_to_fuel:
+  space_heating:
+    - electricity
+    - gas
+    - oil
+    - coal
+    - biofuels
+    - heat
+    - other
+  space_cooling:
+    - electricity
+    - gas
+    - oil
+    - coal
+    - biofuels
+    - heat
+    - other
+  water_heating:
+    - electricity
+    - gas
+    - oil
+    - coal
+    - biofuels
+    - heat
+    - other
+  cooking:
+    - electricity
+    - gas
+    - oil
+    - coal
+    - biofuels
+    - heat
+    - other
+  lighting:
+    - electricity
+    - gas
+    - oil
+    - coal
+    - biofuels
+    - heat
+    - other
+  residential_appliances:
+    - electricity
+    - gas
+    - oil
+    - coal
+    - biofuels
+    - heat
+    - other
+  non_specified:
+    - electricity
+    - gas
+    - oil
+    - coal
+    - biofuels
+    - heat
+    - other
+  other_building_energy_use:
+    - electricity
+    - gas
+    - oil
+    - coal
+    - biofuels
+    - heat
+    - other
+  non_building_energy_use:
+    - electricity
+    - gas
+    - oil
+    - coal
+    - biofuels
+    - heat
+    - other
+

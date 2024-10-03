@@ -5,6 +5,7 @@
 *.html
 *.csv
 
+**/archive/**
 ################PREGENERATED################
 # Byte-compiled / optimized / DLL files
 __pycache__/

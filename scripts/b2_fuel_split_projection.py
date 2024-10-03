@@ -14,8 +14,7 @@ config = configurations.Config(root_dir)
 ####
 # %%
 # import economy data
-economy_list = pd.read_csv(config.root_dir + '/input_data/APEC_economies.csv')
-
+economy_list = pd.read_csv(config.root_dir + '/config/economy_code_to_name.csv')
 # %%
 # Import fuel split (from fuelsplit.py) and projection (from main.py) data
 fuel_split = pd.read_csv(config.root_dir + '/output_data/fuel_split_ratio.csv')

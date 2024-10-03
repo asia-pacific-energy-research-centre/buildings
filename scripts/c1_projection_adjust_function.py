@@ -14,7 +14,7 @@ config = configurations.Config(root_dir)
 ####
 # %%
 # import economy data
-economy_list = pd.read_csv(config.root_dir + '/input_data/APEC_economies.csv')
+economy_list = pd.read_csv(config.root_dir + '/config/economy_code_to_name.csv')
 # %%
 from useful_functions import generate_smooth_curve
 
