@@ -100,7 +100,7 @@ def traj(economy='01_AUS',
                 x='year',
                 y='adj_energy',
                 # color='fuels',
-                title=f"{economy} : {end_use}"
+                title=f"{economy} : {end_use} : {sector}"
                 # labels={
                 #     'year': 'Year',
                 #     'fuel_intensity': 'Fuel Intensity (GJ/cap)',

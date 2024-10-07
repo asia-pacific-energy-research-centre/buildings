@@ -15,18 +15,24 @@ config = configurations.Config(root_dir)
 economy_list = pd.read_csv(config.root_dir + '/input_data/APEC_economies.csv')
 
 # %%
-
-ratios = pd.read_csv(config.root_dir + '/output_data/a4_fuel_split_by_end_use/ratios_fuel_in_end_use.csv')
+# ratios = pd.read_csv(config.root_dir + '/output_data/a4_fuel_split_by_end_use/ratios_fuel_in_end_use.csv')
+ratios = pd.read_csv(config.root_dir + '/output_data/a4.56_ratio_adjust/norm_ratio_to_2100.csv')
 ratios.rename(columns={'sector': 'sub2sectors'}, inplace=True)
+ratios.drop(columns=['ratio'], inplace=True)
+ratios = ratios[ratios['year'] <= 2070].copy()
 # economy	sub2sectors	end_use	fuel	year	ratio	normalized_ratio
 
+# %%
 end_use_projection = pd.read_csv(config.root_dir + '/output_data/a3_projection_adjustment/adjusted_end_use_compiled.csv')
 end_use_projection = end_use_projection[end_use_projection['year'] >= 2000]
+end_use_projection = end_use_projection[end_use_projection['year'] <= 2070]
 # end_use	economy	year	sub2sectors	end_use_sector	end_use_energy_compiled
 
+
+# %%
 merged_df = pd.merge(ratios, end_use_projection[['economy', 'sub2sectors', 'end_use', 'year', 'end_use_energy_compiled']], 
                      on=['economy', 'sub2sectors', 'end_use', 'year'], how='left')
-merged_df.dropna(subset=['end_use_energy_compiled'], inplace=True)
+
 # need the ratios
 # need the end use projections data
 # merge
@@ -36,6 +42,10 @@ merged_df.dropna(subset=['end_use_energy_compiled'], inplace=True)
 # %%
 merged_df['fuel_amount'] = merged_df['normalized_ratio'] * merged_df['end_use_energy_compiled']
 
+merged_df['fuel_amount'] = merged_df['fuel_amount'].fillna(0)
+merged_df = merged_df[merged_df['fuel_amount'] != 0]
+# merged_df.to_csv(config.root_dir + '/test.csv')
+# %%
 fuel_split_end_use = merged_df.copy()
 
 

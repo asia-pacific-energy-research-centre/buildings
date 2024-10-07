@@ -45,7 +45,7 @@ traj_overwrite_df.to_csv(output_dir_csv + 'consolidated_adjusted_fuel.csv', inde
 # %%
 # Merge the adjusted data onto the original data to get df with all economies and fuels even if not updated
 df = pd.read_csv(config.root_dir + '/output_data/a5_end_use_fuel_split/fuel_split_end_use.csv')
-df.drop(columns=['ratio', 'normalized_ratio', 'end_use_energy_compiled'], inplace=True)
+df.drop(columns=['normalized_ratio', 'end_use_energy_compiled'], inplace=True)
 # economy	sub2sectors	end_use	fuel	year	fuel_amount
 
 # %%
@@ -106,4 +106,19 @@ fig.write_html(output_dir_fig + 'fuel_totals_line.html')
 fig = px.area(df_grouped3, x='year', y='fuel_amount', color='fuel', facet_col='economy', facet_col_wrap=7)
 fig.update_yaxes(matches=None, showticklabels=True)
 fig.write_html(output_dir_fig + 'fuel_totals_area.html')
+# %%
+# Create fig sectoral totals of fuels
+df_grouped1_res = df_grouped1[df_grouped1['sub2sectors'] == '16_01_02_residential']
+df_grouped1_srv = df_grouped1[df_grouped1['sub2sectors'] == '16_01_01_commercial_and_public_services']
+
+fig = px.area(df_grouped1_res, x='year', y='fuel_amount', color='fuel', facet_col='economy', facet_col_wrap=7)
+fig.update_yaxes(matches=None, showticklabels=True)
+fig.write_html(output_dir_fig + 'fuel_totals_area_res.html')
+
+fig = px.area(df_grouped1_srv, x='year', y='fuel_amount', color='fuel', facet_col='economy', facet_col_wrap=7)
+fig.update_yaxes(matches=None, showticklabels=True)
+fig.write_html(output_dir_fig + 'fuel_totals_area_srv.html')
+# %%
+df_grouped1_res.to_csv(output_dir_csv + 'df_grouped_res.csv', index=False)
+df_grouped1_srv.to_csv(output_dir_csv + 'df_grouped_srv.csv', index=False)
 # %%

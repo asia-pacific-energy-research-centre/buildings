@@ -54,35 +54,45 @@ years = [i for i in range(1980, 2101, 1)]
 # 01_coal
 # coal is zero by 2017 so no adjustments needed
 # %%
-# 07_petroleum_products
-traj(economy = '03_CDA', end_use = 'space_heating', proj_start_year = 2021, 
-                    shape = 'decrease', magnitude = 0.5,
-                    data=end_use_trajectory_interim)
-# # %%
-# # 08_gas
-# fuel_intensity_traj(economy = '03_CDA', fuels = '08_gas', sector = '16_01_02_residential' proj_start_year = 2022, 
-#                     shape = 'decrease', magnitude = 0.5,
+
+# traj(economy = '03_CDA', end_use = 'space_heating', sector = '16_01_02_residential', proj_start_year = 2021, 
+#                     shape = 'increase', magnitude = 1.1,
 #                     data=end_use_trajectory_interim)
-# # %%
-# # 15_solid_biomass
-# fuel_intensity_traj(economy = '03_CDA', fuels = '15_solid_biomass', proj_start_year = 2022, 
-#                     shape = 'decrease', magnitude = 0.5,
-#                     data=intensity_trajectory_interim)
-# # %%
-# # 16_others
-# fuel_intensity_traj(economy = '03_CDA', fuels = '16_others', proj_start_year = 2022, 
-#                     shape = 'decrease', magnitude = 0.5,
-#                     data=intensity_trajectory_interim)
-# # %%
-# # 17_electricity
-# fuel_intensity_traj(economy = '03_CDA', fuels = '17_electricity', proj_start_year = 2022, 
-#                     shape = 'decrease', magnitude = 0.5,
-#                     data=intensity_trajectory_interim)
-# # %%
-# # 18_heat
-# fuel_intensity_traj(economy = '03_CDA', fuels = '18_heat', proj_start_year = 2022, 
-#                     shape = 'decrease', magnitude = 0.5,
-#                     data=intensity_trajectory_interim)
+
+# traj(economy = '03_CDA', end_use = 'space_cooling', sector = '16_01_02_residential', proj_start_year = 2021, 
+#                     shape = 'decrease', magnitude = 1.1,
+#                     data=end_use_trajectory_interim)
+
+# traj(economy = '03_CDA', end_use = 'cooking', sector = '16_01_02_residential', proj_start_year = 2021, 
+#                     shape = 'increase', magnitude = 1.05,
+#                     data=end_use_trajectory_interim)
+
+# traj(economy = '03_CDA', end_use = 'lighting', sector = '16_01_02_residential', proj_start_year = 2021, 
+#                     shape = 'increase', magnitude = 1.009,
+#                     data=end_use_trajectory_interim)
+
+# traj(economy = '03_CDA', end_use = 'residential_appliances', sector = '16_01_02_residential', proj_start_year = 2021, 
+#                     shape = 'increase', magnitude = 1.05,
+#                     data=end_use_trajectory_interim)
+
+# traj(economy = '03_CDA', end_use = 'water_heating', sector = '16_01_02_residential', proj_start_year = 2021, 
+#                     shape = 'increase', magnitude = 1.05,
+#                     data=end_use_trajectory_interim)
+
+
+# traj(economy = '03_CDA', end_use = 'space_heating', sector = '16_01_01_commercial_and_public_services', proj_start_year = 2021, 
+#                     shape = 'peak', magnitude= 1.2, apex_mag = 0.9995, apex_loc= 40,
+#                     data=end_use_trajectory_interim)
+
+# traj(economy = '03_CDA', end_use = 'space_cooling', sector = '16_01_01_commercial_and_public_services', proj_start_year = 2021, 
+#                     shape = 'decrease', magnitude = 1.2,
+#                     data=end_use_trajectory_interim)
+
+# traj(economy = '03_CDA', end_use = 'lighting', sector = '16_01_01_commercial_and_public_services', proj_start_year = 2021, 
+#                     shape = 'decrease', magnitude = 1.2,
+#                     data=end_use_trajectory_interim)
+
+
 
 
 # %%
@@ -140,7 +150,6 @@ enduse_adj.to_csv(output_dir_csv + 'adjusted_end_use_compiled.csv', index = Fals
 # column headings
 # end_use	economy	year	sub2sectors	end_use_energy_compiled
 
-
 # %%
 # Create fig
 fig = px.line(enduse_adj, x='year', y='end_use_energy_compiled', color='end_use_sector', facet_col='economy', facet_col_wrap=7)
@@ -150,5 +159,45 @@ fig.write_html(output_dir_fig + 'energy_adj_enduses.html')
 fig = px.area(enduse_adj, x='year', y='end_use_energy_compiled', color='end_use_sector', facet_col='economy', facet_col_wrap=7)
 fig.update_yaxes(matches=None, showticklabels=True)
 fig.write_html(output_dir_fig + 'energy_adj_enduses_area.html')
+
+# %%
+# created figures for each economy
+
+# adjusted_end_use_compiled.csv
+
+
+output_dir_fig_line = config.root_dir + '/plotting_output/a3_projection_adjustment/by_economy/line_plots/'
+if not os.path.exists(output_dir_fig_line):
+    os.makedirs(output_dir_fig_line)
+
+output_dir_fig_area = config.root_dir + '/plotting_output/a3_projection_adjustment/by_economy/area_plots/'
+if not os.path.exists(output_dir_fig_area):
+    os.makedirs(output_dir_fig_area)
+
+data_res = enduse_adj[enduse_adj['sub2sectors'] == '16_01_02_residential']
+data_srv = enduse_adj[enduse_adj['sub2sectors'] == '16_01_01_commercial_and_public_services']
+
+for economy in economy_list['economy_code']:
+    plot_res = data_res[data_res['economy'] == economy]
+
+    # fig = px.area(plot_res, x='year', y='end_use_energy_compiled', color='end_use_sector')
+    # fig.update_yaxes(matches=None, showticklabels=True)
+    # fig.write_html(output_dir_fig_area + economy + '_16_01_02_residential.html')
+
+    fig = px.line(plot_res, x='year', y='end_use_energy_compiled', color='end_use_sector')
+    fig.update_yaxes(matches=None, showticklabels=True)
+    fig.write_html(output_dir_fig_line + economy + '_16_01_02_residential.html')
+
+for economy in economy_list['economy_code']:
+    plot_srv = data_srv[data_srv['economy'] == economy]
+
+    # fig = px.area(plot_srv, x='year', y='end_use_energy_compiled', color='end_use_sector')
+    # fig.update_yaxes(matches=None, showticklabels=True)
+    # fig.write_html(output_dir_fig_area + economy + '_16_01_01_commercial_and_public_services.html')
+
+    fig = px.line(plot_srv, x='year', y='end_use_energy_compiled', color='end_use_sector')
+    fig.update_yaxes(matches=None, showticklabels=True)
+    fig.write_html(output_dir_fig_line + economy + '_16_01_01_commercial_and_public_services.html')
+
 
 # %%

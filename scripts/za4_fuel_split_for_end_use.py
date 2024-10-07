@@ -42,7 +42,7 @@ end_uses_merged['ratio'] = end_uses_merged['value'] / end_uses_merged['value_all
 end_uses_merged['sector'] = end_uses_merged['sector'].replace('residential','16_01_02_residential').copy()
 end_uses_merged['sector'] = end_uses_merged['sector'].replace('services','16_01_01_commercial_and_public_services').copy()
 
-# end_uses_merged.to_csv(config.root_dir + '/plotting_output/analysis/END_USE_SIX/test.csv', index=False)
+# end_uses_merged.to_csv(config.root_dir + '/test.csv', index=False)
 # %%
 
 # now merge the ratio data onto the created sheet
@@ -60,34 +60,79 @@ ratios = df_ratios.merge(
     how='left'
 )
 
+ratios.to_csv(output_dir_csv + 'ratios.csv', index=False)
 
-# Assuming df is your DataFrame with columns 'economy', 'sector', 'end_use', 'fuel', 'year', and 'ratio'
-
-# First, we want to sort the DataFrame by 'economy', 'sector', 'end_use', 'fuel', and 'year'
-ratios_fill = ratios.sort_values(by=['economy', 'sector', 'end_use', 'fuel', 'year'])
-
-# Group by 'economy', 'sector', 'end_use', and 'fuel', and apply forward fill
-ratios_fill['ratio'] = ratios_fill.groupby(['economy', 'sector', 'end_use', 'fuel'])['ratio'].ffill()
-
-ratios_fill.to_csv(output_dir_csv + 'ratios_derived_from_IEA_filled.csv', index=False)
-
-# ratios.to_csv(output_dir_csv + 'ratios_derived_from_IEA.csv', index=False)
-
-# %%
-# Right now, just populate na values as 1/6 as placeholder
-ratios_placeholder = ratios_fill.copy()
-ratios_placeholder['ratio'] = ratios_placeholder['ratio'].fillna(1/6)
-
-# Group by 'end_use', 'sector', 'year', and 'economy' and calculate the sum of ratios
-ratios_placeholder['ratio_sum'] = ratios_placeholder.groupby(['end_use', 'sector', 'year', 'economy'])['ratio'].transform('sum')
-
-# Normalize the ratios to ensure they add up to 1
-ratios_placeholder['normalized_ratio'] = ratios_placeholder['ratio'] / ratios_placeholder['ratio_sum']
-ratios_placeholder.drop(columns=['ratio_sum'], inplace=True)
+# ratio calculated for IEA and merged onto total sheet
 
 
-# normalized and placeholder ratios of fuels used in each end use
-ratios_placeholder.to_csv(output_dir_csv + '/ratios_fuel_in_end_use.csv', index=False)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# # %%
+# # Assuming df is your DataFrame with columns 'economy', 'sector', 'end_use', 'fuel', 'year', and 'ratio'
+
+# # First, we want to sort the DataFrame by 'economy', 'sector', 'end_use', 'fuel', and 'year'
+# ratios_fill = ratios.sort_values(by=['economy', 'sector', 'end_use', 'fuel', 'year'])
+
+
+
+# # %%
+# # Right now, just populate na values as 1/6 as placeholder
+# ratios_placeholder = ratios_fill[ratios_fill['ratio'] != 0]
+# ratios_placeholder['ratio'] = ratios_placeholder['ratio'].fillna(1/6)
+# # %%
+
+# # %%
+
+# # Group by 'end_use', 'sector', 'year', and 'economy' and calculate the sum of ratios
+# ratios_placeholder['ratio_sum'] = ratios_placeholder.groupby(['end_use', 'sector', 'year', 'economy'])['ratio'].transform('sum')
+
+# # Normalize the ratios to ensure they add up to 1
+# ratios_placeholder['normalized_ratio'] = ratios_placeholder['ratio'] / ratios_placeholder['ratio_sum']
+# ratios_placeholder.drop(columns=['ratio_sum'], inplace=True)
+
+
+# # normalized and placeholder ratios of fuels used in each end use
+# ratios_placeholder.to_csv(output_dir_csv + '/ratios_fuel_in_end_use.csv', index=False)
+
+
+# CAN EDIT THE RATIOS HERE ?????????????????
+
+
+
+
+
 
 # need fuel split ratios from 2000-2021
 # this ratio can be calculated from IEA and then needs to be normalized to 1

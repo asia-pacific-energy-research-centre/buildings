@@ -257,6 +257,8 @@ new_scaled_projection_df_merge = new_scaled_projection_df.merge(final_population
 #calcaulte the energy use
 new_scaled_projection_df_merge['energy'] = (new_scaled_projection_df_merge['intensity']*new_scaled_projection_df_merge['value'])#/1e6#divide by 1 million to get the energy in PJ
 new_scaled_projection_df_merge['end_use_sector'] = new_scaled_projection_df_merge['end_use'] + ' - ' + new_scaled_projection_df_merge['sub2sectors']
+new_scaled_projection_df_merge = new_scaled_projection_df_merge[new_scaled_projection_df_merge['year'] <= 2070]
+
 
 # %%
 fig = px.area(new_scaled_projection_df_merge, x='year', y='energy', color='end_use_sector', facet_col='economy', facet_col_wrap=7)

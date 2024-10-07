@@ -35,7 +35,16 @@ years = list(range(2000, 2101))
 combinations = list(itertools.product(economies, sectors, end_uses, fuels, years))
 
 # Convert to DataFrame
-df = pd.DataFrame(combinations, columns=['economy', 'sector', 'end_use', 'fuel', 'year'])
+df1 = pd.DataFrame(combinations, columns=['economy', 'sector', 'end_use', 'fuel', 'year'])
+
+restricted_end_uses = ['residential_appliances', 'cooking', 'water_heating']
+df = df1[~((df1['sector'] == '16_01_01_commercial_and_public_services') & 
+                    (df1['end_use'].isin(restricted_end_uses)))]
+
+
+# can filter the df here to have only services + the 3 end uses, if desired
+
+# %%
 
 # Display the first few rows
 print(df.head())
