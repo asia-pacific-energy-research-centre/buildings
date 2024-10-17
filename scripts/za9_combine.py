@@ -27,6 +27,13 @@ output_dir_csv = config.root_dir + '/output_data/a9_conslidated_data/'
 if not os.path.exists(output_dir_csv):
     os.makedirs(output_dir_csv)
 
+# srv = pd.read_csv(config.root_dir + '/output_data/a7_fuel_switch/srv/merged_srv_adjusted_fuel.csv')
+# res = pd.read_csv(config.root_dir + '/output_data/a7_fuel_switch/res/merged_res_adjusted_fuel.csv')
+
+# test = pd.concat([srv, res])
+
+# %%
+
 for sector in sectors:
     # Use the sector name in the file path
     filenames = glob.glob(config.root_dir + f'/output_data/a7_fuel_switch/{sector}/*.csv')
@@ -40,26 +47,47 @@ for sector in sectors:
     #     print(f"Processing file: {filename}")
 
 traj_overwrite_df.to_csv(output_dir_csv + 'consolidated_adjusted_fuel.csv', index=False)
+# %%
+# group traj overwrite by end use etc to match the df for merge
+
+traj_overwrite_df = traj_overwrite_df.copy()
+traj_overwrite_df = traj_overwrite_df.groupby(['economy', 'sub2sectors', 'fuel', 'year'], as_index=False)['fuel_amount'].sum()
+
+
 # economy	sub2sectors	end_use	fuel	year	fuel_amount
 # need to keep these ones
 # %%
 # Merge the adjusted data onto the original data to get df with all economies and fuels even if not updated
-df = pd.read_csv(config.root_dir + '/output_data/a5_end_use_fuel_split/fuel_split_end_use.csv')
-df.drop(columns=['normalized_ratio', 'end_use_energy_compiled'], inplace=True)
+df = pd.read_csv(config.root_dir + '/output_data/a5.5_attempting_again/concat.csv')
+# df.drop(columns=['normalized_ratio', 'end_use_energy_compiled'], inplace=True)
 # economy	sub2sectors	end_use	fuel	year	fuel_amount
+
+df = df[df['year'] <2022]
+
+
+# res = pd.read_csv(config.root_dir + '/output_data/a7_fuel_switch/res/merged_residential_adjusted_fuel.csv')
+# srv = pd.read_csv(config.root_dir + '/output_data/a7_fuel_switch/srv/merged_srv_adjusted_fuel.csv')
+
+# test_rest = pd.read_csv(config.root_dir + '/output_data/a7_fuel_switch/res/merged_residential_adjusted_fuel.csv')
 
 # %%
 df = df.copy()
 traj_overwrite_df = traj_overwrite_df.copy()
 
-df_merged = pd.merge(df, traj_overwrite_df[['economy', 'sub2sectors', 'end_use', 'fuel', 'year', 'fuel_amount']],
-                     on=['economy', 'sub2sectors', 'end_use', 'fuel', 'year'],
-                     how='left',  # Use 'left' to keep all rows from df and fill from traj_overwrite_df
-                     suffixes=('', '_overwrite'))  # Distinguish between columns
-# If you want to overwrite the fuel_amount from traj_overwrite_df, where it exists:
-df_merged['fuel_amount'] = df_merged['fuel_amount_overwrite'].combine_first(df_merged['fuel_amount'])
-# Drop the temporary 'fuel_amount_overwrite' column
-df_merged.drop(columns=['fuel_amount_overwrite'], inplace=True)
+combined_df = pd.concat([df, traj_overwrite_df], ignore_index=True)
+sorted_combined = combined_df.sort_values(by=['economy', 'sub2sectors', 'fuel', 'year']).reset_index(drop=True)
+
+# dont need to merge anything anymore, just need them concatenated
+
+# df_merged = pd.merge(df, traj_overwrite_df[['economy', 'sub2sectors', 'fuel', 'year', 'fuel_amount']],
+#                      on=['economy', 'sub2sectors', 'fuel', 'year'],
+#                      how='left',  # Use 'left' to keep all rows from df and fill from traj_overwrite_df
+#                      suffixes=('', '_overwrite'))  # Distinguish between columns
+# # If you want to overwrite the fuel_amount from traj_overwrite_df, where it exists:
+# df_merged['fuel_amount'] = df_merged['fuel_amount_overwrite'].combine_first(df_merged['fuel_amount'])
+# # Drop the temporary 'fuel_amount_overwrite' column
+# df_merged.drop(columns=['fuel_amount_overwrite'], inplace=True)
+
 
 
 
@@ -68,13 +96,13 @@ df_merged.drop(columns=['fuel_amount_overwrite'], inplace=True)
 # agg fuels by year, subsector, economy
 
 # total amount of each type of fuel for each economy, subsector and year
-df_grouped1 = df_merged.groupby(['economy', 'sub2sectors', 'fuel', 'year'], as_index=False)['fuel_amount'].sum()
+df_grouped1 = sorted_combined.copy()
 
 # total amount of fuel for each subsector, year, and economy (ie not separated by fuel at all, 19_total equivalent)
-df_grouped2 = df_merged.groupby(['economy', 'sub2sectors', 'year'], as_index=False)['fuel_amount'].sum()
+df_grouped2 = sorted_combined.groupby(['economy', 'sub2sectors', 'year'], as_index=False)['fuel_amount'].sum()
 
 # total amount of fuel not separated by subsector, for each year and economy
-df_grouped3 = df_merged.groupby(['economy', 'fuel', 'year'], as_index=False)['fuel_amount'].sum()
+df_grouped3 = sorted_combined.groupby(['economy', 'fuel', 'year'], as_index=False)['fuel_amount'].sum()
 
 # %%
 df_grouped2.to_csv(output_dir_csv + 'total_fuel_by_subsector.csv', index=False)

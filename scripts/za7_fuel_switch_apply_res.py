@@ -18,8 +18,9 @@ config = configurations.Config(root_dir)
 economy_list = pd.read_csv(config.root_dir + '/input_data/APEC_economies.csv')
 
 # data prep
-df = pd.read_csv(config.root_dir + '/output_data/a5_end_use_fuel_split/fuel_split_end_use.csv')
-df.drop(columns=['normalized_ratio', 'end_use_energy_compiled'], inplace=True)
+df = pd.read_csv(config.root_dir + '/output_data/a5.5_attempting_again/end_use_adjusted.csv')
+df.drop(columns=['fuel_amount', 'fuel_ratio'], inplace=True)
+df.rename(columns={'end_use_fuel': 'fuel_amount'}, inplace=True)
 
 # %%
 # grouped_df = df.groupby(['economy', 'sub2sectors', 'fuel', 'year']).agg({'fuel_amount': 'sum'}).reset_index()
@@ -103,7 +104,7 @@ res_copy = df_res.copy()
 # Call the modified function for a specific economy on the copied DataFrame
 
 df_1 = switch_fuel_with_trajectory(res_copy, economy='03_CDA', end_use='space_heating', fuel_1='gas', fuel_2='electricity', 
-                                          start_year=2021, end_year=2070, efficiency_factor=0.4,
+                                          start_year=2022, end_year=2070, efficiency_factor=0.4,
                                           proportion_to_switch=0.75, shape='increase', 
                                            apex_mag=1.5, apex_loc=1)
 
@@ -121,7 +122,7 @@ res_copy = df_res.copy()
 # Call the modified function for a specific economy on the copied DataFrame
 
 df_1 = switch_fuel_with_trajectory(res_copy, economy='03_CDA', end_use='water_heating', fuel_1='gas', fuel_2='electricity', 
-                                          start_year=2021, end_year=2070, efficiency_factor=0.4,
+                                          start_year=2022, end_year=2070, efficiency_factor=0.4,
                                           proportion_to_switch=0.75, shape='increase', 
                                            apex_mag=1.5, apex_loc=1)
 
@@ -152,7 +153,7 @@ if not os.path.exists(output_dir_csv):
 df_combined_adjustments = pd.concat([df_cda, df_aus], ignore_index=True)
 
 # %%
-old_data = res_copy.copy()
+old_data = df_res.copy()
 
 merged_df = pd.merge(old_data, df_combined_adjustments[['economy', 'sub2sectors', 'end_use', 'fuel', 'year', 'fuel_amount']],  
     on=['economy', 'sub2sectors', 'end_use', 'fuel', 'year'],
@@ -161,10 +162,12 @@ merged_df = pd.merge(old_data, df_combined_adjustments[['economy', 'sub2sectors'
 
 merged_df['fuel_amount'] = merged_df['fuel_amount_y'].combine_first(merged_df['fuel_amount_x'])
 merged_df = merged_df.drop(columns=['fuel_amount_x', 'fuel_amount_y'])
+sorted = merged_df.sort_values(by=['economy', 'sub2sectors', 'fuel', 'year']).reset_index(drop=True)
+
 
 
 # %%
 
-merged_df.to_csv(output_dir_csv + 'merged_residential_adjusted_fuel.csv')
+sorted.to_csv(output_dir_csv + 'merged_res_adjusted_fuel.csv', index=False)
 
 # %%

@@ -99,6 +99,8 @@ data.drop(columns=['ratio_sum'], inplace=True)
 data['normalized_ratio'] = data['normalized_ratio'].fillna(0)
 data = data[data['normalized_ratio'] != 0].copy()
 
+
+data.to_csv(output_dir_csv + 'ratios.csv')
 # %%
 output_dir_fig = config.root_dir + '/plotting_output/a4.56_ratio_adjust/adjusted_ratios/'
 if not os.path.exists(output_dir_fig):
@@ -139,6 +141,8 @@ for economy in economy_list['economy_code']:
 # %%
 ##################################### To be done once ratios are finalized for each economy
 
+
+# I think maybe this isnt needed anymore since we go to normalization next
 data_to_2021 = data.copy()
 df_combined = pd.concat([data_to_2021, df_to_concat], ignore_index=True)
 

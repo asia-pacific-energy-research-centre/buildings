@@ -58,7 +58,7 @@ def switch_fuel_with_trajectory(df_initial, economy, end_use, fuel_1, fuel_2, st
                 new_row = row.copy()
                 new_row['fuel'] = fuel_2
                 new_row['fuel_amount'] = adjusted_fuel_to_add
-                df = df.append(new_row, ignore_index=True)
+                df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
     
     return df
 
